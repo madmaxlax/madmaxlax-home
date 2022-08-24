@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<!-- saved from url=(0026)http://info.madmaxlax.com/ -->
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>User Info | Mad Max Lax</title>
+
+    <link rel="shortcut icon" href="http://info.madmaxlax.com/favicon.ico" />
+</head>
+
+<body>
+    <h3>User Info</h3>
+    <p>
+        User Agent:
+        <span id="UserAgent">Loading...</span> <br />
+        <br />
+        IP: <strong id="IPAddr">Loading </strong> <span id="VPN"></span> <br />
+        Estimated Location: <span id="iploc">Searching</span>
+
+        <br />
+    </p>
+    <table border="0">
+        <style>
+            th,
+            td.date {
+                text-align: Left;
+            }
+
+            td {
+                text-align: right;
+            }
+        </style>
+        <tbody>
+            <tr>
+                <th>Your estimated time:</th>
+                <td id="YourTime">Loading</td>
+                <td class="date"></td>
+            </tr>
+            <tr>
+                <th>--</th>
+                <td>
+                    --
+                </td>
+                <td class="date">--</td>
+            </tr>
+            <tr>
+                <th>Boulder:</th>
+                <td id="BoulderTime">
+                    loading
+                </td>
+                <td class="date" id="BoulderDate"></td>
+            </tr>
+            <tr>
+                <th>NOLA:</th>
+                <td id="NOLATime">
+                    loading
+                </td>
+                <td class="date" id="NOLADate"></td>
+            </tr>
+            <tr>
+                <th>
+                    Baltimore:
+                </th>
+                <td id="BaltTime">
+                    loading
+                </td>
+                <td class="date" id="BaltDate"></td>
+            </tr>
+            <tr>
+                <th>
+                    UK:
+                </th>
+                <td id="UKTime">
+                    loading
+                </td>
+                <td class="date" id="UKDate"></td>
+            </tr>
+            <tr>
+                <th>
+                    Amster/Europe:
+                </th>
+                <td id="AmsterTime">
+                    loading
+                </td>
+                <td class="date" id="AmsterDate"></td>
+            </tr>
+            <tr>
+                <th>
+                    India:
+                </th>
+                <td id="IndiaTime">
+                    loading
+                </td>
+                <td class="date" id="IndiaDate"></td>
+            </tr>
+            <tr>
+                <th>
+                    Hong Kong:
+                </th>
+                <td id="HKTime">
+                    loading
+                </td>
+                <td class="date" id="HKDate"></td>
+            </tr>
+            <tr>
+                <th>
+                    Perth, Aus:
+                </th>
+                <td id="PerthTime">
+                    loading
+                </td>
+                <td class="date" id="PerthDate"></td>
+            </tr>
+            <tr>
+                <th>
+                    Sydney, Aus:
+                </th>
+                <td id="SydneyTime">
+                    loading
+                </td>
+                <td class="date" id="SydneyDate"></td>
+            </tr>
+        </tbody>
+    </table>
+    <p></p>
+    <script>
+        // set user agent
+        document.getElementById("UserAgent").innerHTML = navigator.userAgent;
+
+        var xmlhttpIPAddr = new XMLHttpRequest();
+        //free geoIP address lookup REST API
+        // var url = "http://api.ipstack.com/?access_key=c3ee03f48eee09e3dbc269330eab1aee&format=1";
+        var url = "http://ipwho.is/";
+        var locObj;
+        var loaded = false;
+        var currentTime = new Date();
+        var updateTimeZoneValues = (currentTime) => {
+            var toUpdate = [
+                ["Boulder", "America/Denver"],
+                ["NOLA", "America/Chicago"],
+                ["Balt", "America/New_York"],
+                ["UK", "Europe/London"],
+                ["Amster", "Europe/Rome"],
+                ["India", "Asia/Calcutta"],
+                ["HK", "Asia/Hong_Kong"],
+                ["Perth", "Australia/Perth"],
+                ["Sydney", "Australia/Sydney"]
+            ];
+            toUpdate.map((timezone) => {
+                document.getElementById(timezone[0] + 'Time').innerHTML = currentTime.toLocaleTimeString('en-US', { timeZone: timezone[1] });
+                document.getElementById(timezone[0] + 'Date').innerHTML = currentTime.toLocaleDateString('en-US', {
+                    timeZone: timezone[1], dateStyle: "medium"
+                });
+
+            })
+        };
+        updateTimeZoneValues(currentTime);
+
+        xmlhttpIPAddr.onreadystatechange = function () {
+            if (xmlhttpIPAddr.readyState == 4 && xmlhttpIPAddr.status == 200) {
+                locObj = JSON.parse(xmlhttpIPAddr.responseText);
+                //do stuff with data
+                console.log("IP location estimate:", locObj);
+                var ipAddress;
+                var city;
+                var state;
+                var country;
+                var countryEmoji;
+                var time;
+                var ispOrg;
+
+                ipAddress = locObj.ip;
+
+                if (locObj["city"] == "") city = "(no city estimate)";
+                else city = locObj["city"];
+
+                if (locObj["region"] == "") state = "(no region estimate)";
+                else state = locObj["region"];
+
+                if (locObj["country"] == "") country = "(no country estimate)";
+                else country = locObj["country"];
+
+                countryEmoji = locObj["country_code"]
+                    .toUpperCase()
+                    .replace(/./g, (char) =>
+                        String.fromCodePoint(char.charCodeAt(0) + 127397)
+                    );
+
+                if (locObj["timezone"] == "") time = "(no timezone estimate)";
+                else {
+                    time = locObj["timezone"];
+                    currentTime = new Date(time.current_time);
+                    updateTimeZoneValues(currentTime)
+                }
+
+                ispOrg =
+                    locObj.connection.isp +
+                    (locObj.connection.isp !== locObj.connection.org
+                        ? "-" + locObj.connection.org
+                        : "");
+
+                //upadte the html
+                document.getElementById("IPAddr").innerHTML = ipAddress;
+
+                document.getElementById("YourTime").innerHTML = new Date(time.current_time).toLocaleTimeString();
+                document.getElementById("iploc").innerHTML =
+                    city +
+                    ", " +
+                    state +
+                    ", " +
+                    country +
+                    " " +
+                    countryEmoji +
+                    "<br/> timezone: " +
+                    time.id +
+                    ". <br/>ISP: " +
+                    ispOrg;
+                loaded = true;
+            }
+        };
+        xmlhttpIPAddr.open("GET", url, true);
+        xmlhttpIPAddr.send();
+        var text;
+        var i = 0;
+        text = "Searching";
+        var loadanimationinterval = setInterval(function () {
+            if (!loaded) {
+                document.getElementById("iploc").innerHTML =
+                    text + Array((++i % 4) + 1).join(".");
+            }
+        }, 300);
+
+        //IP VPN
+        const ip4ToInt = (ip) =>
+            ip
+                .split(".")
+                .reduce((int, oct) => (int << 8) + parseInt(oct, 10), 0) >>> 0;
+
+        const isIp4InCidr = (ip) => (cidr) => {
+            const [range, bits = 32] = cidr.split("/");
+            const mask = ~(2 ** (32 - bits) - 1);
+            return (ip4ToInt(ip) & mask) === (ip4ToInt(range) & mask);
+        };
+
+        const isIp4InCidrs = (ip, cidrs) => cidrs.some(isIp4InCidr(ip));
+
+        if (isIp4InCidrs("99.196.130.208", ["23.253.199.224/27"])) {
+            document.getElementById("VPN").innerHTML = "🔒 BCG VPN";
+        } // true
+    </script>
+</body>
+
+</html>
