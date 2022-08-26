@@ -24,6 +24,10 @@
     </p>
     <table border="0">
         <style>
+            * {
+                font-family: "Helvetica Neue", Helvetica, sans-serif;
+            }
+
             th,
             td.date {
                 text-align: Left;
@@ -35,7 +39,7 @@
         </style>
         <tbody>
             <tr>
-                <th>Your estimated time:</th>
+                <th>Your estimated local time:</th>
                 <td id="YourTime">Loading</td>
                 <td class="date"></td>
             </tr>
@@ -249,7 +253,7 @@
         const isIp4InCidrs = (ip, cidrs) => cidrs.some(isIp4InCidr(ip));
 
         const checkVPN = (ipAddress) => {
-            if (isIp4InCidrs(ipAddress, ["23.253.199.224/27"])) {
+            if (isIp4InCidrs(ipAddress, ["23.253.199.224/27", "161.47.201.135/32", "161.47.201.136/30"])) {
                 document.getElementById("VPN").innerHTML = "🔒 BCG US";
             }
             if (isIp4InCidrs(ipAddress, ["198.212.99.0/24"])) {
